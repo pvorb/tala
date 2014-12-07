@@ -1,5 +1,12 @@
 package de.vorb.tala
 
+import akka.actor.ActorSystem
+import akka.actor.Props
+import akka.actor.actorRef2Scala
+
+import spray.json.DefaultJsonProtocol._
+import spray.json.pimpAny
+
 import org.mashupbots.socko.events.HttpResponseStatus
 import org.mashupbots.socko.infrastructure.Logger
 import org.mashupbots.socko.routes.GET
@@ -9,12 +16,10 @@ import org.mashupbots.socko.routes.Routes
 import org.mashupbots.socko.webserver.WebServer
 import org.mashupbots.socko.webserver.WebServerConfig
 
-import akka.actor.ActorSystem
-import akka.actor.Props
-import akka.actor.actorRef2Scala
-
-import spray.json._
-import spray.json.DefaultJsonProtocol._
+import de.vorb.tala.actors.APIHandler
+import de.vorb.tala.actors.FileHandler
+import de.vorb.tala.actors.Messages.GetCommentCount
+import de.vorb.tala.actors.Messages.GetComments
 
 /**
  * Tala comment server.

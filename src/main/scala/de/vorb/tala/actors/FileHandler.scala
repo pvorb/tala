@@ -1,10 +1,8 @@
-package de.vorb.tala
-
-import java.util.Date
-
-import org.mashupbots.socko.events.HttpRequestEvent
+package de.vorb.tala.actors
 
 import akka.actor.Actor
+
+import org.mashupbots.socko.events.HttpRequestEvent
 
 class FileHandler extends Actor {
     def receive = {

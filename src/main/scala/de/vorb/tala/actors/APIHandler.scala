@@ -1,9 +1,9 @@
-package de.vorb.tala
-
-import org.mashupbots.socko.events.HttpResponseStatus
-import org.mashupbots.socko.routes.HttpRequest
+package de.vorb.tala.actors
 
 import akka.actor.Actor
+
+import de.vorb.tala.actors.Messages.GetCommentCount
+import de.vorb.tala.actors.Messages.GetComments
 
 class APIHandler extends Actor {
     def receive = {
