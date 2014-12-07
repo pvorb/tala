@@ -1,10 +1,11 @@
 package de.vorb.util.impl
 
 import java.util.Date
+
 import scala.collection.mutable.LinkedHashMap
 import scala.collection.mutable.Map
 import scala.concurrent.duration.Duration
-import scala.concurrent.duration.DurationInt
+
 import de.vorb.util.Cache
 
 /**

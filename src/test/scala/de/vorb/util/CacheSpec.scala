@@ -1,6 +1,7 @@
 package de.vorb.util
 
 import scala.concurrent.duration.DurationInt
+
 import org.scalatest.FlatSpec
 
 class CacheSpec extends FlatSpec {
@@ -66,25 +67,14 @@ class CacheSpec extends FlatSpec {
             k.hashCode
         }
 
-        val cache = Cache(sideEffectedMap, capacity = 2)
+        val cache = Cache(sideEffectedMap, capacity = 2, 50.milliseconds)
 
         cache.get("foo")
         assert(counter == 1)
         cache.get("foo")
         assert(counter == 1)
+        Thread.sleep(50)
         cache.get("foo")
-        assert(counter == 1)
-        cache.get("bar")
         assert(counter == 2)
-        cache.get("bar")
-        assert(counter == 2)
-        cache.get("baz")
-        assert(counter == 3)
-        cache.get("baz")
-        assert(counter == 3)
-        cache.get("bar")
-        assert(counter == 3)
-        cache.get("foo")
-        assert(counter == 4)
     }
 }
