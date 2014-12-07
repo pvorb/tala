@@ -5,36 +5,86 @@ import org.scalatest.FlatSpec
 
 class CacheSpec extends FlatSpec {
     // key value function
-    def kv(k: String): Int = k.hashCode
+    def map(k: String): Int = k.hashCode
 
-    "A cache" should "deliver its items" in {
-        val cache = new Cache(kv, capacity = 2, revalidateAfter = 2.minutes)
+    "A cache" should "deliver the same values as its given map function" in {
+        val cache = Cache(map, capacity = 2)
 
-        assert(cache.get("foo") == kv("foo"))
-        assert(cache.get("bar") == kv("bar"))
-        assert(cache.get("baz") == kv("baz"))
+        assert(cache.get("foo") == map("foo"))
+        assert(cache.get("bar") == map("bar"))
+        assert(cache.get("baz") == map("baz"))
     }
 
-    "A cache" should "respect its capacity" in {
-        val cache = new Cache(kv, capacity = 2, revalidateAfter = 2.minutes)
+    it should "respect its capacity" in {
+        val cache = Cache(map, capacity = 2)
+        assert(cache.size == 0)
 
         cache.get("foo")
+        assert(cache.size == 1)
+
         cache.get("bar")
         cache.get("baz")
+        assert(cache.size == 2)
 
+        cache.get("baz")
         assert(cache.size == 2)
     }
 
-    "A cache" should "cache its last values" in {
-        val cache = new Cache(kv, capacity = 2, revalidateAfter = 2.minutes)
+    it should "get its values from cache if possible" in {
+        var counter = 0
+        def sideEffectedMap(k: String): Int = {
+            counter += 1
+            k.hashCode
+        }
+
+        val cache = Cache(sideEffectedMap, capacity = 2)
 
         cache.get("foo")
+        assert(counter == 1)
         cache.get("foo")
+        assert(counter == 1)
         cache.get("foo")
+        assert(counter == 1)
         cache.get("bar")
+        assert(counter == 2)
         cache.get("bar")
+        assert(counter == 2)
         cache.get("baz")
+        assert(counter == 3)
+        cache.get("baz")
+        assert(counter == 3)
+        cache.get("bar")
+        assert(counter == 3)
+        cache.get("foo")
+        assert(counter == 4)
+    }
 
-        assert(cache.cache.keySet == Set("bar", "baz"))
+    it should "re-validate its values after timeout" in {
+        var counter = 0
+        def sideEffectedMap(k: String): Int = {
+            counter += 1
+            k.hashCode
+        }
+
+        val cache = Cache(sideEffectedMap, capacity = 2)
+
+        cache.get("foo")
+        assert(counter == 1)
+        cache.get("foo")
+        assert(counter == 1)
+        cache.get("foo")
+        assert(counter == 1)
+        cache.get("bar")
+        assert(counter == 2)
+        cache.get("bar")
+        assert(counter == 2)
+        cache.get("baz")
+        assert(counter == 3)
+        cache.get("baz")
+        assert(counter == 3)
+        cache.get("bar")
+        assert(counter == 3)
+        cache.get("foo")
+        assert(counter == 4)
     }
 }
