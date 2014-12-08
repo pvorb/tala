@@ -6,11 +6,13 @@ import de.vorb.tala.actors.Messages.GetComments
 import org.mashupbots.socko.events.HttpResponseStatus
 import de.vorb.tala.db.DBPool
 import de.vorb.tala.cache.Caches
+import org.pegdown.PegDownProcessor
+import org.pegdown.Extensions
 
 class APIHandler extends Actor {
     def receive = {
-        case GetComments(resp, Some(document), _) =>
-            resp.write(s"comments for $document.")
+        case GetComments(resp, Some(uri), _) =>
+            resp.write(s"comments for $uri.")
             context.stop(self)
 
         case GetComments(resp, _, Some(quantity)) =>
