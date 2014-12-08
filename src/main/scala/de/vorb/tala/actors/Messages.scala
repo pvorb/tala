@@ -13,14 +13,14 @@ object Messages {
                        file: String) extends TalaRequest
 
     case class GetComments(response: HttpResponseMessage,
-                           document: Option[String],
+                           uri: Option[String],
                            quantity: Option[Int]) extends APIRequest
 
     case class GetCommentCount(response: HttpResponseMessage,
-                               document: Option[String]) extends APIRequest
+                               uri: Option[String]) extends APIRequest
 
     case class PostComment(response: HttpResponseMessage,
-                           document: String,
+                           uri: String,
                            documentTitle: Option[String],
                            text: String,
                            author: Option[String],
@@ -29,12 +29,12 @@ object Messages {
                            subscription: Boolean) extends APIRequest
 
     case class ReplaceComment(response: HttpResponseMessage,
-                              document: String,
+                              uri: String,
                               id: Long,
                               key: String) extends APIRequest
 
     case class DeleteComment(response: HttpResponseMessage,
-                             document: String,
+                             uri: String,
                              id: Long,
                              key: String) extends APIRequest
 
