@@ -35,12 +35,12 @@ object Tala extends Logger {
                 http.response.write(HttpResponseStatus.NOT_FOUND)
 
             case GET(Path("/api/comment")) =>
-                val doc = http.request.endPoint.getQueryString("doc")
+                val uri = http.request.endPoint.getQueryString("uri")
 
-                if (doc.isDefined) {
+                if (uri.isDefined) {
                     // list comments for the given document
                     actorSystem.actorOf(Props[APIHandler]) !
-                        GetComments(http.response, document = doc,
+                        GetComments(http.response, uri = uri,
                             quantity = None)
                 } else {
                     val qs = http.request.endPoint.getQueryString("quantity")
@@ -51,7 +51,7 @@ object Tala extends Logger {
 
                         // get the most recent comments of the whole site
                         actorSystem.actorOf(Props[APIHandler]) !
-                            GetComments(http.response, document = None,
+                            GetComments(http.response, uri = None,
                                 quantity = Some(qty))
                     } catch {
                         case e: NumberFormatException =>
@@ -62,9 +62,9 @@ object Tala extends Logger {
                 }
 
             case GET(Path("/api/comment-count")) =>
-                val doc = http.request.endPoint.getQueryString("doc")
+                val uri = http.request.endPoint.getQueryString("uri")
                 actorSystem.actorOf(Props[APIHandler]) !
-                    GetCommentCount(http.response, doc)
+                    GetCommentCount(http.response, uri)
 
             case Path(path) if path startsWith "/res/" =>
                 actorSystem.actorOf(Props[FileHandler]) ! http
