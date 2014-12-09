@@ -27,9 +27,6 @@ class APIHandler extends Actor {
                     resp.status = HttpResponseStatus.INTERNAL_SERVER_ERROR
                     resp.write("{error:\"db problem\"}", "application/json")
             }
-
-            println(Caches.commentCountsCache)
-
             context.stop(self)
 
         case GetCommentCount(resp, None) =>
