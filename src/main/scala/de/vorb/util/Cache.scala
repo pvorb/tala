@@ -45,7 +45,7 @@ trait Cache[K, V] {
 
 object Cache {
     def apply[K, V](map: K => V, capacity: Int = 1024,
-                    revalitationTimeout: Duration = 10.minutes): Cache[K, V] = {
-        new LinkedHashMapCache[K, V](map, capacity, revalitationTimeout)
+                    revalidationTimeout: Duration = 10.minutes): Cache[K, V] = {
+        new LinkedHashMapCache[K, V](map, capacity, revalidationTimeout)
     }
 }

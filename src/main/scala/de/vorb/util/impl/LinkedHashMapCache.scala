@@ -19,12 +19,12 @@ import de.vorb.util.Cache
  */
 private[util] class LinkedHashMapCache[K, V](map: K => V,
                                              override val capacity: Int,
-                                             revalitationTimeout: Duration)
+                                             revalidationTimeout: Duration)
         extends Cache[K, V] {
     require(capacity > 0, "capacity <= 0")
-    require(revalitationTimeout.isFinite(), "non-finite revalidation time")
+    require(revalidationTimeout.isFinite(), "non-finite revalidation time")
 
-    private val timeout: Long = revalitationTimeout.toMillis
+    private val timeout: Long = revalidationTimeout.toMillis
     private val cache: LinkedHashMap[K, V] = LinkedHashMap.empty
     private val cacheTime: Map[K, Date] = Map.empty
 
