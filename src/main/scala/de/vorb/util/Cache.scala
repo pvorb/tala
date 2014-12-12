@@ -23,6 +23,13 @@ trait Cache[K, V] {
     def get(key: K): V
 
     /**
+     * Invalidate a cached value.
+     *
+     * @param key key for the value that should be invalidated.
+     */
+    def invalidate(key: K): Unit
+
+    /**
      * Number of cached values.
      */
     def size: Int

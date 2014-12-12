@@ -78,6 +78,13 @@ private[util] class LinkedHashMapCache[K, V](map: K => V,
         }
     }
 
+    def invalidate(key: K): Unit = {
+        if (cache.isDefinedAt(key)) {
+            cache -= key
+            cacheTime -= key
+        }
+    }
+
     /**
      * Number of cached values.
      */
