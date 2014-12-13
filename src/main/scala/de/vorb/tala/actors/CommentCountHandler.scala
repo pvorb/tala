@@ -1,27 +1,18 @@
 package de.vorb.tala.actors
 
-import akka.actor.Actor
-import de.vorb.tala.actors.Messages.GetCommentCount
-import de.vorb.tala.cache.Caches
-import org.mashupbots.socko.events.HttpResponseStatus
-import com.google.common.cache.CacheBuilder
-import com.google.common.cache.LoadingCache
-import java.util.concurrent.TimeUnit
-import de.vorb.tala.db.DBPool
-import com.google.common.cache.CacheLoader
-
 import java.lang.Long
-import java.util.Date
 import java.util.concurrent.TimeUnit
 
-import scala.concurrent.duration.DurationInt
+import akka.actor.Actor
+
+import org.mashupbots.socko.events.HttpResponseStatus
 
 import com.google.common.cache.CacheBuilder
 import com.google.common.cache.CacheLoader
 import com.google.common.cache.LoadingCache
 
+import de.vorb.tala.actors.Messages.GetCommentCount
 import de.vorb.tala.db.DBPool
-import de.vorb.tala.model.Comment
 
 class CommentCountHandler extends Actor {
     def receive = {
