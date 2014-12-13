@@ -1,44 +1,40 @@
 package de.vorb.tala.actors
 
 import java.util.Date
-
+import org.mashupbots.socko.events.HttpRequestEvent
+import org.mashupbots.socko.events.HttpRequestMessage
 import org.mashupbots.socko.events.HttpResponseMessage
+import org.mashupbots.socko.events.HttpRequestEvent
 
 object Messages {
     sealed trait TalaMessage
     sealed trait TalaRequest extends TalaMessage
     sealed trait APIRequest extends TalaRequest
 
-    case class GetFile(response: HttpResponseMessage,
+    case class GetFile(http: HttpRequestEvent,
                        file: String) extends TalaRequest
 
-    case class GetComments(response: HttpResponseMessage,
-                           uri: Option[String],
-                           quantity: Option[Int]) extends APIRequest
+    case class GetComments(http: HttpRequestEvent,
+                           uri: String) extends APIRequest
 
-    case class GetCommentCount(response: HttpResponseMessage,
+    case class ListComments(http: HttpRequestEvent) extends APIRequest
+
+    case class GetCommentCount(http: HttpRequestEvent,
                                uri: Option[String]) extends APIRequest
 
-    case class PostComment(response: HttpResponseMessage,
-                           uri: String,
-                           documentTitle: Option[String],
-                           text: String,
-                           author: Option[String],
-                           email: Option[String],
-                           website: Option[String],
-                           subscription: Boolean) extends APIRequest
+    case class PostComment(http: HttpRequestEvent,
+                           uri: String) extends APIRequest
 
-    case class ReplaceComment(response: HttpResponseMessage,
-                              uri: String,
+    case class ReplaceComment(http: HttpRequestEvent,
                               id: Long,
                               key: String) extends APIRequest
 
-    case class DeleteComment(response: HttpResponseMessage,
+    case class DeleteComment(http: HttpRequestEvent,
                              uri: String,
                              id: Long,
                              key: String) extends APIRequest
 
-    case class GetMostCommentedDocuments(response: HttpResponseMessage,
+    case class GetMostCommentedDocuments(http: HttpRequestEvent,
                                          since: Option[Date],
                                          quantity: Option[Int]) extends APIRequest
 }
