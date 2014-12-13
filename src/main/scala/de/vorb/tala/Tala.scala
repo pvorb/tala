@@ -3,23 +3,14 @@ package de.vorb.tala
 import akka.actor.ActorSystem
 import akka.actor.Props
 import akka.actor.actorRef2Scala
-
-import spray.json.DefaultJsonProtocol._
-import spray.json.pimpAny
-
 import org.mashupbots.socko.events.HttpResponseStatus
 import org.mashupbots.socko.infrastructure.Logger
-import org.mashupbots.socko.routes.GET
-import org.mashupbots.socko.routes.HttpRequest
-import org.mashupbots.socko.routes.Path
-import org.mashupbots.socko.routes.Routes
+import org.mashupbots.socko.routes._
 import org.mashupbots.socko.webserver.WebServer
 import org.mashupbots.socko.webserver.WebServerConfig
 
-import de.vorb.tala.actors.APIHandler
-import de.vorb.tala.actors.FileHandler
-import de.vorb.tala.actors.Messages.GetCommentCount
-import de.vorb.tala.actors.Messages.GetComments
+import de.vorb.tala.actors._
+import de.vorb.tala.actors.Messages._
 
 /**
  * Tala comment server.
@@ -29,45 +20,41 @@ import de.vorb.tala.actors.Messages.GetComments
 object Tala extends Logger {
     val actorSystem = ActorSystem("TalaActorSystem")
 
+    object UriParam extends QueryStringField("uri")
+    object IdParam extends QueryStringField("id")
+    object KeyParam extends QueryStringField("key")
+
     val routes = Routes({
         case HttpRequest(http) => http match {
             case GET(Path("/favicon.ico")) =>
+                // no favicon available
                 http.response.write(HttpResponseStatus.NOT_FOUND)
 
+            case GET(Path("/api/comment") & UriParam(uri)) =>
+                // get comments for the given document
+                actorSystem.actorOf(Props[CommentHandler]) !
+                    GetComments(http, uri)
+
             case GET(Path("/api/comment")) =>
-                val uri = http.request.endPoint.getQueryString("uri")
+                // list all comments (with a limit)
+                actorSystem.actorOf(Props[CommentHandler]) !
+                    ListComments(http)
 
-                if (uri.isDefined) {
-                    // list comments for the given document
-                    actorSystem.actorOf(Props[APIHandler]) !
-                        GetComments(http.response, uri = uri,
-                            quantity = None)
-                } else {
-                    val qs = http.request.endPoint.getQueryString("quantity")
+            case POST(Path("/api/comment")) & UriParam(uri) =>
+                actorSystem.actorOf(Props[CommentHandler]) !
+                    PostComment(http, uri)
 
-                    try {
-                        // try to parse the GET param "quantity"
-                        val qty = qs.getOrElse("5").toInt
+            case PUT(PathSegments("api" :: "comment" :: id :: Nil))
+                & KeyParam(key) =>
+                actorSystem.actorOf(Props[CommentHandler]) !
+                    ReplaceComment(http, id.toLong, key)
 
-                        // get the most recent comments of the whole site
-                        actorSystem.actorOf(Props[APIHandler]) !
-                            GetComments(http.response, uri = None,
-                                quantity = Some(qty))
-                    } catch {
-                        case e: NumberFormatException =>
-                            // response with error message
-                            http.response.write(HttpResponseStatus.BAD_REQUEST,
-                                Map("message" -> s"Bad number format for query parameter 'quantity': ${qs.get}").toJson.compactPrint)
-                    }
-                }
+            case GET(Path("/api/comment-count")) & QueryString(uri) =>
+                actorSystem.actorOf(Props[CommentCountHandler]) !
+                    GetCommentCount(http, Some(uri))
 
-            case GET(Path("/api/comment-count")) =>
-                val uri = http.request.endPoint.getQueryString("uri")
-                actorSystem.actorOf(Props[APIHandler]) !
-                    GetCommentCount(http.response, uri)
-
-            case Path(path) if path startsWith "/res/" =>
-                actorSystem.actorOf(Props[FileHandler]) ! http
+            case GET(Path(path)) if path startsWith "/res/" =>
+                actorSystem.actorOf(Props[FileHandler]) ! GetFile(http, path)
         }
     })
 
