@@ -23,6 +23,9 @@ object Tala extends Logger {
     object UriParam extends QueryStringField("uri")
     object IdParam extends QueryStringField("id")
     object KeyParam extends QueryStringField("key")
+    object EmailParam extends QueryStringField("email")
+    object ExpirationParam extends QueryStringField("expiration")
+    object SignatureParam extends QueryStringField("signature")
 
     val routes = Routes({
         case HttpRequest(http) => http match {
@@ -49,9 +52,20 @@ object Tala extends Logger {
                 actorSystem.actorOf(Props[CommentHandler]) !
                     ReplaceComment(http, id.toLong, key)
 
-            case GET(Path("/api/comment-count")) & QueryString(uri) =>
+            case GET(Path("/api/comment-count")) & UriParam(uri) =>
                 actorSystem.actorOf(Props[CommentCountHandler]) !
                     GetCommentCount(http, Some(uri))
+
+            case GET(Path("/api/subscribe") & UriParam(uri) &
+                EmailParam(email)) =>
+                actorSystem.actorOf(Props[SubscriptionHandler]) !
+                    Subscribe(http, uri, email)
+
+            case GET(Path("/api/unsubscribe") & UriParam(uri) &
+                EmailParam(email) & ExpirationParam(expiration) &
+                SignatureParam(signature)) =>
+                actorSystem.actorOf(Props[SubscriptionHandler]) !
+                    Unsubscribe(http, uri, email, expiration, signature)
 
             case GET(Path(path)) if path startsWith "/res/" =>
                 actorSystem.actorOf(Props[FileHandler]) ! GetFile(http, path)

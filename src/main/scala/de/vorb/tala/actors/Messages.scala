@@ -5,6 +5,7 @@ import org.mashupbots.socko.events.HttpRequestEvent
 import org.mashupbots.socko.events.HttpRequestMessage
 import org.mashupbots.socko.events.HttpResponseMessage
 import org.mashupbots.socko.events.HttpRequestEvent
+import org.mashupbots.socko.events.HttpRequestEvent
 
 object Messages {
     sealed trait TalaMessage
@@ -37,4 +38,14 @@ object Messages {
     case class GetMostCommentedDocuments(http: HttpRequestEvent,
                                          since: Option[Date],
                                          quantity: Option[Int]) extends APIRequest
+
+    case class Subscribe(http: HttpRequestEvent,
+                         uri: String,
+                         email: String) extends APIRequest
+
+    case class Unsubscribe(http: HttpRequestEvent,
+                           uri: String,
+                           email: String,
+                           expiration: String,
+                           signature: String) extends APIRequest
 }
