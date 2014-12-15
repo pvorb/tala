@@ -3,55 +3,48 @@ package de.vorb.tala.actors
 import java.util.Date
 import java.util.concurrent.ExecutionException
 import java.util.concurrent.TimeUnit
-
 import akka.actor.Actor
-
 import org.mashupbots.socko.events.HttpResponseStatus
-
 import com.google.common.cache.CacheBuilder
 import com.google.common.cache.CacheLoader
 import com.google.common.cache.LoadingCache
-
 import de.vorb.tala.actors.Messages.GetComments
 import de.vorb.tala.actors.Messages.ListComments
 import de.vorb.tala.db.DBPool
 import de.vorb.tala.model.Comment
+import org.json.simple.JSONObject
+import java.util.List
+import java.util.ArrayList
+import java.util.HashMap
+import org.json.simple.JSONValue
+import org.mashupbots.socko.events.HttpResponseMessage
 
 class CommentHandler extends Actor {
     def receive = {
-        case GetComments(http, uri) =>
-            try {
-                val comments = CommentHandler.cache.get(uri)
-                http.response.contentType = "application/json"
-                http.response.write(comments.mkString("[", ",", "]"))
-            } catch {
-                case e: ExecutionException =>
-                    http.response.write(HttpResponseStatus.BAD_REQUEST)
-            } finally {
-                context.stop(self)
-            }
+        case GetComments(http, uri) => respond(http.response, uri)
+        case ListComments(http) => respond(http.response, "")
+    }
 
-        case ListComments(http) =>
-            try {
-                val comments = CommentHandler.cache.get("")
-                http.response.contentType = "application/json"
-                http.response.write(comments.mkString("[", ",", "]"))
-            } catch {
-                case _: NumberFormatException =>
-                    http.response.write(HttpResponseStatus.BAD_REQUEST)
-            }
-
+    def respond(resp: HttpResponseMessage, uri: String): Unit = {
+        try {
+            resp.contentType = "application/json"
+            resp.write(CommentHandler.cache.get(uri))
+        } catch {
+            case _: ExecutionException =>
+                resp.write(HttpResponseStatus.BAD_REQUEST)
+        } finally {
             context.stop(self)
+        }
     }
 }
 
 object CommentHandler {
-    val cache: LoadingCache[String, List[Comment]] = CacheBuilder
+    val cache: LoadingCache[String, String] = CacheBuilder
         .newBuilder()
         .maximumSize(32)
         .expireAfterAccess(10, TimeUnit.DAYS)
-        .build(new CacheLoader[String, List[Comment]] {
-            override def load(uri: String): List[Comment] = {
+        .build(new CacheLoader[String, String] {
+            override def load(uri: String): String = {
                 val conn = DBPool.getConnection
                 val stmt =
                     if (uri.nonEmpty) {
@@ -84,7 +77,7 @@ object CommentHandler {
                 stmt.setQueryTimeout(30) // TODO configurable timeout?
                 val results = stmt.executeQuery()
 
-                val comments = List.newBuilder[Comment]
+                val comments = new ArrayList[Comment]()
                 while (results.next()) {
                     val id = results.getLong("id")
                     val parent = results.getLong("parent")
@@ -96,13 +89,19 @@ object CommentHandler {
                     val author = results.getString("author")
                     val email = results.getString("email")
                     val website = results.getString("website")
-                    comments += Comment(id, parent, created, modified, text,
-                        author, email, website)
+                    comments.add(Comment(id, parent, created, modified, text,
+                        author, email, website))
                 }
 
                 results.close()
 
-                comments.result()
+                wrapListInObject("comments", comments)
             }
         })
+
+    def wrapListInObject(name: String, list: List[Comment]): String = {
+        val obj = new HashMap[String, AnyRef](1)
+        obj.put(name, list)
+        JSONValue.toJSONString(obj)
+    }
 }
