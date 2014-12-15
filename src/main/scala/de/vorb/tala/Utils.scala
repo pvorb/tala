@@ -15,16 +15,15 @@ object Utils {
     def dateToISO8601(date: Date): String = f.format(date)
 
     private val md5inst = MessageDigest.getInstance("MD5")
-    def md5(str: String): String = {
-        val hashBytes = md5inst.digest(str.getBytes(StandardCharsets.UTF_8))
+    def md5(msg: String): String = {
+        val hashBytes = md5inst.digest(msg.getBytes(StandardCharsets.UTF_8))
         val hashInt = new BigInteger(1, hashBytes)
         String.format("%0"+(hashBytes.length << 1)+"x", hashInt)
     }
 
     private val sha256inst = MessageDigest.getInstance("SHA-256")
-    def sha256(message: String, secret: String): String = {
-        val combined = (message+"/"+secret).getBytes(StandardCharsets.UTF_8)
-        val hashBytes = sha256inst.digest(combined)
+    def sha256(msg: String): String = {
+        val hashBytes = sha256inst.digest(msg.getBytes(StandardCharsets.UTF_8))
         val hashInt = new BigInteger(1, hashBytes)
         String.format("%0"+(hashBytes.length << 1)+"X", hashInt)
     }
