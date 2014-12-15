@@ -74,7 +74,7 @@ object CommentHandler {
                         stmt
                     }
 
-                stmt.setQueryTimeout(30) // TODO configurable timeout?
+                stmt.setQueryTimeout(30)
                 val results = stmt.executeQuery()
 
                 val comments = new ArrayList[Comment]()
