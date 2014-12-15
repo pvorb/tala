@@ -1,23 +1,27 @@
 package de.vorb.tala.actors
 
+import java.util.ArrayList
+
 import java.util.Date
+import java.util.HashMap
+import java.util.List
 import java.util.concurrent.ExecutionException
 import java.util.concurrent.TimeUnit
+
 import akka.actor.Actor
+
+import org.json.simple.JSONValue
+import org.mashupbots.socko.events.HttpResponseMessage
 import org.mashupbots.socko.events.HttpResponseStatus
+
 import com.google.common.cache.CacheBuilder
 import com.google.common.cache.CacheLoader
 import com.google.common.cache.LoadingCache
+
 import de.vorb.tala.actors.Messages.GetComments
 import de.vorb.tala.actors.Messages.ListComments
 import de.vorb.tala.db.DBPool
 import de.vorb.tala.model.Comment
-import org.json.simple.JSONObject
-import java.util.List
-import java.util.ArrayList
-import java.util.HashMap
-import org.json.simple.JSONValue
-import org.mashupbots.socko.events.HttpResponseMessage
 
 class CommentHandler extends Actor {
     def receive = {
