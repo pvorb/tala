@@ -22,19 +22,9 @@ case class Comment(id: Long, parent: Long, created: Date, modified: Date,
         if (author != null)
             obj.put("author", author)
         if (email != null)
-            obj.put("mailhash", Comment.md5(email))
+            obj.put("mailhash", Utils.md5(email))
         if (website != null)
             obj.put("website", website)
         JSONValue.toJSONString(obj)
-    }
-}
-
-object Comment {
-    private val md5inst = MessageDigest.getInstance("MD5")
-
-    def md5(str: String): String = {
-        val hashBytes = md5inst.digest(str.getBytes(StandardCharsets.UTF_8))
-        val hashInt = new BigInteger(1, hashBytes)
-        String.format("%0"+(hashBytes.length << 1)+"x", hashInt)
     }
 }
