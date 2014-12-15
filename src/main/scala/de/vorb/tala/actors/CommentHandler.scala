@@ -33,12 +33,9 @@ class CommentHandler extends Actor {
 
         case ListComments(http) =>
             try {
-                val limit: Option[Long] =
-                    http.request.endPoint.getQueryString("limit").map(_.toLong)
-                val offset: Option[Long] =
-                    http.request.endPoint.getQueryString("offset").map(_.toLong)
-
-                http.response.write(s"limit = $limit, offset = $offset")
+                val comments = CommentHandler.cache.get("")
+                http.response.contentType = "application/json"
+                http.response.write(comments.mkString("[", ",", "]"))
             } catch {
                 case _: NumberFormatException =>
                     http.response.write(HttpResponseStatus.BAD_REQUEST)
@@ -56,19 +53,35 @@ object CommentHandler {
         .build(new CacheLoader[String, List[Comment]] {
             override def load(uri: String): List[Comment] = {
                 val conn = DBPool.getConnection
-                val stmt = conn.prepareStatement(
-                    """|SELECT
-                       |  comments.id, parent, created, modified, text, author,
-                       |  email, website, likes, dislikes, voters
-                       |FROM threads, comments
-                       |WHERE
-                       |  threads.uri = ? AND
-                       |  threads.id = comments.tid
-                       |ORDER BY
-                       |  comments.created ASC;
-                       |""".stripMargin)
+                val stmt =
+                    if (uri.nonEmpty) {
+                        val stmt = conn.prepareStatement(
+                            """|SELECT
+                               |  comments.id, parent, created, modified, text,
+                               |  author, email, website
+                               |FROM threads, comments
+                               |WHERE
+                               |  threads.uri = ? AND
+                               |  threads.id = comments.tid
+                               |ORDER BY
+                               |  comments.created ASC;
+                               |""".stripMargin)
+                        stmt.setString(1, uri)
+                        stmt
+                    } else {
+                        val stmt = conn.prepareStatement(
+                            """|SELECT
+                               |  id, parent, created, modified, text, author,
+                               |  email, website
+                               |FROM comments
+                               |ORDER BY
+                               |  comments.created DESC
+                               |LIMIT 10;
+                               |""".stripMargin)
+                        stmt
+                    }
+
                 stmt.setQueryTimeout(30) // TODO configurable timeout?
-                stmt.setString(1, uri)
                 val results = stmt.executeQuery()
 
                 val comments = List.newBuilder[Comment]
@@ -83,10 +96,8 @@ object CommentHandler {
                     val author = results.getString("author")
                     val email = results.getString("email")
                     val website = results.getString("website")
-                    val likes = results.getLong("likes")
-                    val dislikes = results.getLong("dislikes")
-                    comments += Comment(id, parent, created, modified, text, author,
-                        email, website)
+                    comments += Comment(id, parent, created, modified, text,
+                        author, email, website)
                 }
 
                 results.close()
