@@ -11,14 +11,23 @@ import java.text.ParseException
 
 object Utils {
     val utc: TimeZone = TimeZone.getTimeZone("UTC")
-    private val f: DateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'")
+    private val isoDateFormat: DateFormat =
+        new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'")
+    private val uriDateFormat: DateFormat =
+        new SimpleDateFormat("yyyyMMdd")
 
-    def dateToISO8601(date: Date): String = f.format(date)
+    def dateToISO8601(date: Date): String = isoDateFormat.format(date)
     def parseISO8601(date: String): Option[Date] = try {
-        Some(f.parse(date))
+        Some(isoDateFormat.parse(date))
     } catch {
-        case e: ParseException =>
-            None
+        case _: Throwable => None
+    }
+
+    def dateToUriFormat(date: Date): String = uriDateFormat.format(date)
+    def parseUrlDate(date: String): Option[Date] = try {
+        Some(uriDateFormat.parse(date))
+    } catch {
+        case _: Throwable => None
     }
 
     private val md5inst = MessageDigest.getInstance("MD5")
