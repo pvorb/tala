@@ -51,7 +51,7 @@ object CommentHandler {
             override def load(uri: String): String = {
                 val conn = DBPool.getConnection
                 val stmt =
-                    if (uri.nonEmpty) {
+                    if (uri.length > 0) {
                         val stmt = conn.prepareStatement(
                             """|SELECT
                                |  comments.id, parent, created, modified, text,
