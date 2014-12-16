@@ -8,12 +8,13 @@ import de.vorb.tala.Utils
 import java.nio.charset.StandardCharsets
 import java.math.BigInteger
 
-case class Comment(id: Long, parent: Long, created: Date, modified: Date,
-                   text: String, author: String, email: String,
+case class Comment(id: Option[Long], parent: Long, created: Date,
+                   modified: Date, text: String, author: String, email: String,
                    website: String) {
     override def toString: String = {
         val obj = new LinkedHashMap[String, Any]
-        obj.put("id", id)
+        if (id.isDefined)
+            obj.put("id", id.get)
         obj.put("parent", parent)
         obj.put("created", Utils.dateToISO8601(created))
         if (created.before(modified))
