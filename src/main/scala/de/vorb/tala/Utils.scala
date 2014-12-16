@@ -7,12 +7,19 @@ import java.util.TimeZone
 import java.security.MessageDigest
 import java.nio.charset.StandardCharsets
 import java.math.BigInteger
+import java.text.ParseException
 
 object Utils {
     val utc: TimeZone = TimeZone.getTimeZone("UTC")
     private val f: DateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'")
 
     def dateToISO8601(date: Date): String = f.format(date)
+    def parseISO8601(date: String): Option[Date] = try {
+        Some(f.parse(date))
+    } catch {
+        case e: ParseException =>
+            None
+    }
 
     private val md5inst = MessageDigest.getInstance("MD5")
     def md5(msg: String): String = {
