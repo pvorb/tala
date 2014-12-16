@@ -37,9 +37,9 @@ object Utils {
         String.format("%0"+(hashBytes.length << 1)+"x", hashInt)
     }
 
-    private val sha256inst = MessageDigest.getInstance("SHA-256")
-    def sha256(msg: String): String = {
-        val hashBytes = sha256inst.digest(msg.getBytes(StandardCharsets.UTF_8))
+    private val sha1inst = MessageDigest.getInstance("SHA-1")
+    def sha1(msg: String): String = {
+        val hashBytes = sha1inst.digest(msg.getBytes(StandardCharsets.UTF_8))
         val hashInt = new BigInteger(1, hashBytes)
         String.format("%0"+(hashBytes.length << 1)+"X", hashInt)
     }
