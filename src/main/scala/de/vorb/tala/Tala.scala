@@ -24,8 +24,8 @@ object Tala extends Logger {
     object IdParam extends QueryStringField("id")
     object KeyParam extends QueryStringField("key")
     object EmailParam extends QueryStringField("email")
-    object ExpirationParam extends QueryStringField("expiration")
-    object SignatureParam extends QueryStringField("signature")
+    object ExpirationParam extends QueryStringField("exp")
+    object SignatureParam extends QueryStringField("sig")
 
     val routes = Routes({
         case HttpRequest(http) => http match {
@@ -69,6 +69,9 @@ object Tala extends Logger {
 
             case GET(Path(path)) if path startsWith "/res/" =>
                 actorSystem.actorOf(Props[FileHandler]) ! GetFile(http, path)
+
+            case _ =>
+                http.response.write(HttpResponseStatus.BAD_REQUEST)
         }
     })
 
