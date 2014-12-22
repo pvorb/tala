@@ -173,9 +173,9 @@ object CommentHandler {
                     val modified =
                         Utils.floatToDate(results.getDouble("modified"))
                     val text = results.getString("text")
-                    val author = results.getString("author")
-                    val email = results.getString("email")
-                    val website = results.getString("website")
+                    val author = Option(results.getString("author"))
+                    val email = Option(results.getString("email"))
+                    val website = Option(results.getString("website"))
                     comments.add(CommentResult(id, parent, created, modified,
                         text, author, email, website))
                 }
