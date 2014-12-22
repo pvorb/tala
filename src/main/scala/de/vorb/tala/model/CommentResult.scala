@@ -7,10 +7,6 @@ import org.json.simple.JSONValue
 
 import de.vorb.tala.Utils
 
-case class CommentRequest(parent: Long, created: Date, text: String,
-                          author: String, email: String, website: String,
-                          remoteAddress: String)
-
 case class CommentResult(id: Long, parent: Long, created: Date, modified: Date,
                          text: String, author: String, email: String,
                          website: String) {
