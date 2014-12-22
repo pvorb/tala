@@ -13,6 +13,7 @@ libraryDependencies ++= Seq(
     "org.slf4j" % "slf4j-nop" % "1.6.4",
     "com.mchange" % "c3p0" % "0.9.5-pre10",
     "org.xerial" % "sqlite-jdbc" % "3.8.7",
-    "org.pegdown" % "pegdown" % "1.4.2",
+    "com.googlecode.owasp-java-html-sanitizer" % "owasp-java-html-sanitizer" % "r239",
+    "org.owasp.encoder" % "encoder" % "1.1.1",
     "org.scalatest" % "scalatest_2.11" % "2.2.1" % "test"
 )
