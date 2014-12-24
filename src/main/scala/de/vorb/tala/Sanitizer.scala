@@ -24,7 +24,7 @@ object Sanitizer {
         .allowStandardUrlProtocols()
         .toFactory()
 
-    def sanitizeComment(obj: JSONObject): Try[CommentRequest] = {
+    def sanitizeComment(obj: JSONObject): Try[CommentRequest] = try {
         val parent =
             obj.get("parent").asInstanceOf[Long]
 
@@ -50,5 +50,7 @@ object Sanitizer {
                     website, remoteAddr))
             case Failure(throwable) => Failure(throwable)
         }
+    } catch {
+        case throwable: Throwable => Failure(throwable)
     }
 }
