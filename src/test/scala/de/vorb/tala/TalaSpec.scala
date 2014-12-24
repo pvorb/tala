@@ -21,11 +21,12 @@ class TalaSpec extends FlatSpec {
             def run = Tala.main(Array[String]())
         })
 
-        try test()
+        try super.withFixture(test)
         finally pool.shutdown()
     }
 
-    "Tala" should "should accept a new valid comment" in { () =>
+    "Tala" should "accept a new valid comment" in {
+        println("test 1")
         val client = HttpClients.createDefault()
         val req = new HttpPost("http://localhost:8888/api/comments")
         req.setEntity(new StringEntity(
@@ -39,11 +40,10 @@ class TalaSpec extends FlatSpec {
                |}""".stripMargin,
             ContentType.create("application/json", StandardCharsets.UTF_8)))
         val resp = client.execute(req)
-        println(resp)
         assert(resp.getStatusLine.getStatusCode == 200, "response status code")
     }
 
-    it should "should refuse an invalid comment" in { () =>
+    it should "refuse an invalid comment" in {
         // create an invalid test request with socko
     }
 }
