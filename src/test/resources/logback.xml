@@ -1,0 +1,3 @@
+<configuration>
+  <logger name="io.netty" level="OFF"/>
+</configuration>
