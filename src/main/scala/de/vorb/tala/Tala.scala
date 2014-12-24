@@ -18,7 +18,7 @@ import de.vorb.tala.actors.Messages._
  * @author Paul Vorbach
  */
 object Tala extends Logger {
-    val actorSystem = ActorSystem("TalaActorSystem")
+    val actorSystem = ActorSystem("Tala")
 
     object UriParam extends QueryStringField("uri")
     object IdParam extends QueryStringField("id")
@@ -71,7 +71,8 @@ object Tala extends Logger {
                 actorSystem.actorOf(Props[FileHandler]) ! GetFile(http, path)
 
             case _ =>
-                http.response.write(HttpResponseStatus.BAD_REQUEST)
+                http.response.status = HttpResponseStatus.BAD_REQUEST
+                Utils.writeThrowable(http.response, new IllegalRequestException)
         }
     })
 
