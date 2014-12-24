@@ -6,27 +6,32 @@ import java.util.HashMap
 import java.util.List
 import java.util.concurrent.ExecutionException
 import java.util.concurrent.TimeUnit
+
 import scala.compat.Platform
+import scala.util.Failure
+import scala.util.Success
+
 import akka.actor.Actor
+
 import org.json.simple.JSONObject
 import org.json.simple.JSONValue
 import org.json.simple.parser.JSONParser
 import org.mashupbots.socko.events.HttpRequestEvent
 import org.mashupbots.socko.events.HttpResponseMessage
 import org.mashupbots.socko.events.HttpResponseStatus
+
 import com.google.common.cache.CacheBuilder
 import com.google.common.cache.CacheLoader
 import com.google.common.cache.LoadingCache
+
+import de.vorb.tala.Sanitizer
 import de.vorb.tala.Utils
 import de.vorb.tala.actors.Messages.GetComments
 import de.vorb.tala.actors.Messages.ListComments
 import de.vorb.tala.actors.Messages.PostComment
 import de.vorb.tala.db.DBPool
-import de.vorb.tala.model.CommentResult
-import de.vorb.tala.Sanitizer
-import scala.util.Success
-import scala.util.Failure
 import de.vorb.tala.model.CommentRequest
+import de.vorb.tala.model.CommentResult
 
 class CommentHandler extends Actor {
     def receive = {

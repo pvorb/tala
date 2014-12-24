@@ -1,10 +1,7 @@
 package de.vorb.tala.actors
 
 import java.util.Date
-import org.mashupbots.socko.events.HttpRequestEvent
-import org.mashupbots.socko.events.HttpRequestMessage
-import org.mashupbots.socko.events.HttpResponseMessage
-import org.mashupbots.socko.events.HttpRequestEvent
+
 import org.mashupbots.socko.events.HttpRequestEvent
 
 object Messages {

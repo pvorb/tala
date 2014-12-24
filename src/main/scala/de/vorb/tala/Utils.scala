@@ -8,8 +8,9 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.HashMap
 import java.util.TimeZone
+
 import scala.util.Try
-import org.mashupbots.socko.events.HttpResponseStatus
+
 import org.json.simple.JSONValue
 import org.mashupbots.socko.events.HttpResponseMessage
 

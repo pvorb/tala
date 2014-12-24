@@ -1,7 +1,8 @@
 package de.vorb.tala.db
 
-import com.mchange.v2.c3p0.ComboPooledDataSource
 import java.sql.Connection
+
+import com.mchange.v2.c3p0.ComboPooledDataSource
 
 object DBPool {
     private val pool = new ComboPooledDataSource()

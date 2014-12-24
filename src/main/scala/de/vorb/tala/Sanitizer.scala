@@ -3,14 +3,15 @@ package de.vorb.tala
 import java.net.MalformedURLException
 import java.net.URISyntaxException
 import java.net.URL
-import scala.util.Failure
+
 import scala.util.Failure
 import scala.util.Success
 import scala.util.Try
+
 import org.json.simple.JSONObject
 import org.owasp.encoder.Encode
 import org.owasp.html.HtmlPolicyBuilder
-import de.vorb.tala.model.CommentResult
+
 import de.vorb.tala.model.CommentRequest
 
 object Sanitizer {
