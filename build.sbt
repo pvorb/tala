@@ -15,5 +15,6 @@ libraryDependencies ++= Seq(
     "org.xerial" % "sqlite-jdbc" % "3.8.7",
     "com.googlecode.owasp-java-html-sanitizer" % "owasp-java-html-sanitizer" % "r239",
     "org.owasp.encoder" % "encoder" % "1.1.1",
-    "org.scalatest" % "scalatest_2.11" % "2.2.1" % "test"
+    "org.scalatest" %% "scalatest" % "2.2.1" % Test,
+    "org.apache.httpcomponents" % "httpclient" % "4.3.6" % Test
 )
