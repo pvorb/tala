@@ -16,13 +16,13 @@ class TalaSpec extends FlatSpec {
     implicit val system = ActorSystem("tala-spec")
 
     override def withFixture(test: NoArgTest) = {
-        val single = Executors.newSingleThreadExecutor()
-        single.submit(new Runnable {
+        val pool = Executors.newSingleThreadExecutor()
+        pool.execute(new Runnable {
             def run = Tala.main(Array[String]())
         })
 
-        try test.apply()
-        finally single.shutdown()
+        try test()
+        finally pool.shutdown()
     }
 
     "Tala" should "should accept a new valid comment" in { () =>
