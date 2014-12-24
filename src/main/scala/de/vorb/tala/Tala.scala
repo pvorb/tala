@@ -73,7 +73,8 @@ object Tala extends Logger {
 
             case _ =>
                 http.response.status = HttpResponseStatus.BAD_REQUEST
-                Utils.writeThrowable(http.response, new IllegalRequestException)
+                Utils.writeThrowable(http.response,
+                    new IllegalRequestException("Unknown resource"))
         }
     })
 
