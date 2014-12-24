@@ -63,8 +63,8 @@ class CommentHandler extends Actor {
             }
 
         } catch {
-            case _: Throwable =>
-                http.response.write(HttpResponseStatus.BAD_REQUEST)
+            case throwable: Throwable =>
+                Utils.writeThrowable(http.response, throwable)
         } finally {
             context.stop(self)
         }
