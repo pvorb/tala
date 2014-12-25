@@ -8,11 +8,10 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.HashMap
 import java.util.TimeZone
-
 import scala.util.Try
-
 import org.json.simple.JSONValue
 import org.mashupbots.socko.events.HttpResponseMessage
+import org.mashupbots.socko.events.HttpResponseStatus
 
 object Utils {
     val utc: TimeZone = TimeZone.getTimeZone("UTC")
@@ -51,6 +50,10 @@ object Utils {
 
     def writeThrowable(resp: HttpResponseMessage, t: Throwable): Unit = {
         val wrapper = new HashMap[String, HashMap[String, Any]](1)
+
+        if (resp.status == HttpResponseStatus.OK) {
+            resp.status = HttpResponseStatus.BAD_REQUEST
+        }
 
         val err = new HashMap[String, Any]
         err.put("code", resp.status.code)
