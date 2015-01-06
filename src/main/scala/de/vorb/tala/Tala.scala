@@ -72,9 +72,8 @@ object Tala extends Logger {
                 actorSystem.actorOf(Props[FileHandler]) ! GetFile(http, path)
 
             case _ =>
-                http.response.status = HttpResponseStatus.BAD_REQUEST
                 Utils.writeThrowable(http.response,
-                    new IllegalRequestException("Unknown resource"))
+                    new IllegalRequestException("Unknown resource"+http.request.endPoint))
         }
     })
 

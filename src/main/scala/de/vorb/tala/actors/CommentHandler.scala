@@ -6,24 +6,19 @@ import java.util.HashMap
 import java.util.List
 import java.util.concurrent.ExecutionException
 import java.util.concurrent.TimeUnit
-
 import scala.compat.Platform
 import scala.util.Failure
 import scala.util.Success
-
 import akka.actor.Actor
-
 import org.json.simple.JSONObject
 import org.json.simple.JSONValue
 import org.json.simple.parser.JSONParser
 import org.mashupbots.socko.events.HttpRequestEvent
 import org.mashupbots.socko.events.HttpResponseMessage
 import org.mashupbots.socko.events.HttpResponseStatus
-
 import com.google.common.cache.CacheBuilder
 import com.google.common.cache.CacheLoader
 import com.google.common.cache.LoadingCache
-
 import de.vorb.tala.Sanitizer
 import de.vorb.tala.Utils
 import de.vorb.tala.actors.Messages.GetComments
@@ -32,6 +27,9 @@ import de.vorb.tala.actors.Messages.PostComment
 import de.vorb.tala.db.DBPool
 import de.vorb.tala.model.CommentRequest
 import de.vorb.tala.model.CommentResult
+import java.sql.SQLException
+import java.sql.Types
+import scala.concurrent.blocking
 
 class CommentHandler extends Actor {
     def receive = {
@@ -52,60 +50,60 @@ class CommentHandler extends Actor {
         }
     }
 
-    def postComment(http: HttpRequestEvent, uri: String): Unit = {
-        try {
-            // parse the comment
-            val jsonStr = http.request.content.toString(StandardCharsets.UTF_8)
-            val jsonObj = new JSONParser().parse(jsonStr)
-                .asInstanceOf[JSONObject]
+    def postComment(http: HttpRequestEvent, uri: String): Unit = try {
+        // parse the comment
+        val jsonStr = http.request.content.toString(StandardCharsets.UTF_8)
+        val jsonObj = new JSONParser().parse(jsonStr)
+            .asInstanceOf[JSONObject]
 
+        blocking {
             Sanitizer.sanitizeComment(jsonObj) match {
                 case Success(comment) =>
-                    postComment(uri, comment,
+                    createDbEntries(uri, comment,
                         jsonObj.get("threadTitle").asInstanceOf[String])
+
+                    http.response.write(HttpResponseStatus.CREATED)
                 case Failure(t) =>
                     Utils.writeThrowable(http.response, t)
             }
-
-        } catch {
-            case throwable: Throwable =>
-                Utils.writeThrowable(http.response, throwable)
-        } finally {
-            context.stop(self)
         }
+    } catch {
+        case throwable: Throwable =>
+            Utils.writeThrowable(http.response, throwable)
+    } finally {
+        context.stop(self)
     }
 
-    def postComment(uri: String, comment: CommentRequest,
-                    threadTitle: String): Unit = {
-
+    def createDbEntries(uri: String, comment: CommentRequest,
+                        threadTitle: String): Unit = {
         // add the corresponding thread
         val conn = DBPool.getConnection
         val createThread = conn.prepareStatement(
-            """|INSERT IGNORE INTO threads
+            """|INSERT INTO threads
                |  (uri, title)
                |VALUES
                |  (?, ?);""".stripMargin)
         createThread.setString(1, uri)
         createThread.setString(2, threadTitle)
-        createThread.execute()
 
-        // get the id of the inserted thread
-        val tid = {
+        // get the id of the inserted or old thread
+        val tid = try {
+            createThread.execute() // this might throw a SQLException
             val keys = createThread.getGeneratedKeys
-            if (keys.next()) {
-                // if a new entry was made, use the new id
-                keys.getLong("id")
-            } else {
+            keys.next()
+            // if a new entry was made, use the new id
+            keys.getLong("id")
+        } catch {
+            case e: SQLException =>
                 // otherwise do a SELECT to get the id of the thread
                 val getThreadId = conn.prepareStatement(
                     "SELECT id FROM threads WHERE uri = ?;")
                 getThreadId.setString(1, uri)
                 val result = getThreadId.executeQuery()
                 if (!result.next()) {
-                    throw new Exception("race condition")
+                    throw new Exception("unexpected")
                 }
                 result.getLong("id")
-            }
         }
 
         // create the new comment
@@ -118,9 +116,10 @@ class CommentHandler extends Actor {
 
         createComment.setLong(1, tid)
         createComment.setLong(2, comment.parent)
-        createComment.setDouble(3, Utils.dateToFloat(Platform.currentTime))
-        createComment.setDouble(4, 0d)
-        createComment.setInt(5, 1)
+        createComment.setDouble(3,
+            Utils.dateToFloat(Platform.currentTime)) // created == [now]
+        createComment.setNull(4, Types.FLOAT) // modified == NULL
+        createComment.setInt(5, 1) // mode
         createComment.setString(6, comment.remoteAddress)
         createComment.setString(7, comment.text)
         createComment.setString(8, comment.author)
