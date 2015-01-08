@@ -53,8 +53,7 @@ class CommentHandler extends Actor {
     def postComment(http: HttpRequestEvent, uri: String): Unit = try {
         // parse the comment
         val jsonStr = http.request.content.toString(StandardCharsets.UTF_8)
-        val jsonObj = new JSONParser().parse(jsonStr)
-            .asInstanceOf[JSONObject]
+        val jsonObj = new JSONParser().parse(jsonStr).asInstanceOf[JSONObject]
 
         blocking {
             Sanitizer.sanitizeComment(jsonObj) match {
@@ -109,22 +108,21 @@ class CommentHandler extends Actor {
         // create the new comment
         val createComment = conn.prepareStatement(
             """|INSERT INTO comments
-               |  (tid, parent, created, modified, mode, remote_addr,
-               |    text, author, email, website)
+               |  (tid, parent, created, modified, public, text, author,
+               |    emailHash, website)
                |VALUES
-               |  (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);""".stripMargin)
+               |  (?, ?, ?, ?, ?, ?, ?, ?, ?);""".stripMargin)
 
+        val now = Utils.dateToFloat(Platform.currentTime)
         createComment.setLong(1, tid)
         createComment.setLong(2, comment.parent)
-        createComment.setDouble(3,
-            Utils.dateToFloat(Platform.currentTime)) // created == [now]
-        createComment.setNull(4, Types.FLOAT) // modified == NULL
-        createComment.setInt(5, 1) // mode
-        createComment.setString(6, comment.remoteAddress)
-        createComment.setString(7, comment.text)
-        createComment.setString(8, comment.author)
-        createComment.setString(9, comment.email)
-        createComment.setString(10, comment.website)
+        createComment.setDouble(3, now)
+        createComment.setDouble(4, now)
+        createComment.setInt(5, 1)
+        createComment.setString(6, comment.text)
+        createComment.setString(7, comment.author)
+        createComment.setString(8, comment.emailHash)
+        createComment.setString(9, comment.website)
 
         createComment.execute()
     }
